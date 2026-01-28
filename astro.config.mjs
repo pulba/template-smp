@@ -33,8 +33,8 @@ export default defineConfig({
   middleware: {
     onRequest
   },
-
-  output: "static",
+  output: "server",
+  adapter: cloudflare(),
   integrations: [
     alpinejs(),
     sitemap(),
