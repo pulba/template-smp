@@ -34,6 +34,7 @@ export default defineConfig({
     onRequest
   },
 
+  output: "static",
   integrations: [
     alpinejs(),
     sitemap(),
@@ -43,7 +44,7 @@ export default defineConfig({
       ],
     }),
     compress({
-      HTML: true,
+      HTML: true, // HTML compression can sometimes conflict with various hydrations
       Image: {
         avif: {
           effort: 4,

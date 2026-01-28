@@ -1,7 +1,6 @@
 import type { APIRoute } from 'astro';
 import db from '../../../lib/db';
 
-export const prerender = false;
 export const GET: APIRoute = async ({ url }) => {
   const tahun = url.searchParams.get('tahun');
 
