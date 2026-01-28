@@ -1,0 +1,244 @@
+---
+interface GalleryItem {
+    image: string;
+    title: string;
+}
+
+interface Props {
+    items: GalleryItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<div
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+    id="gallery-grid"
+>
+    {
+        items.map((item, index) => (
+            <div
+                class="group relative rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 bg-white border border-gray-100 break-inside-avoid"
+                data-animate="fade-up"
+                style={`animation-delay: ${index * 50}ms;`}
+            >
+                <div
+                    class="aspect-square overflow-hidden cursor-pointer gallery-item"
+                    data-src={item.image}
+                    data-title={item.title}
+                >
+                    <img
+                        src={item.image}
+                        alt={item.title}
+                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading="lazy"
+                    />
+
+                    {/* Overlay */}
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-4 p-4">
+                        <h3 class="font-bold text-center text-lg text-primary">
+                            {item.title}
+                        </h3>
+                        <p>hapus</p>
+
+                        <div class="flex items-center gap-3">
+                            <button
+                                class="p-2 bg-white/20 hover:bg-white/40 rounded-full backdrop-blur-sm transition-colors view-btn"
+                                title="Lihat Foto"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    />
+                                </svg>
+                            </button>
+
+                            <a
+                                href={item.image}
+                                download={item.title}
+                                target="_blank"
+                                class="p-2 bg-white/20 hover:bg-white/40 rounded-full backdrop-blur-sm transition-colors"
+                                title="Download Foto"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6 text-surface"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                    />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        ))
+    }
+</div>
+
+{/* Lightbox Modal */}
+<div
+    id="lightbox"
+    class="fixed inset-0 z-50 bg-black/95 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center p-4"
+>
+    <button
+        id="lightbox-close"
+        class="absolute top-4 right-4 text-white/70 hover:text-white p-2"
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-8 w-8"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+    </button>
+
+    <div
+        class="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center"
+    >
+        <img
+            id="lightbox-img"
+            src=""
+            alt=""
+            class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+        />
+        <h3
+            id="lightbox-caption"
+            class="text-primary text-xl font-medium mt-4 text-center"
+        >
+        </h3>
+
+        <a
+            id="lightbox-download"
+            href="#"
+            download
+            class="mt-4 px-6 py-2 bg-primary rounded-full font-semibold hover:bg-secondary transition-colors flex items-center gap-2"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-suface"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                ></path>
+            </svg>
+            <span class="text-suface">Download Foto</span>
+        </a>
+    </div>
+</div>
+
+<script>
+    function initLightbox() {
+        const lightbox = document.getElementById("lightbox");
+        const lightboxImg = document.getElementById(
+            "lightbox-img",
+        ) as HTMLImageElement;
+        const lightboxCaption = document.getElementById("lightbox-caption");
+        const lightboxDownload = document.getElementById(
+            "lightbox-download",
+        ) as HTMLAnchorElement;
+        const closeBtn = document.getElementById("lightbox-close");
+        const galleryItems = document.querySelectorAll(".gallery-item");
+
+        if (
+            !lightbox ||
+            !lightboxImg ||
+            !lightboxCaption ||
+            !lightboxDownload ||
+            !closeBtn
+        )
+            return;
+
+        function openLightbox(src: string, title: string) {
+            lightboxImg.src = src;
+            lightboxImg.alt = title;
+            lightboxCaption!.textContent = title;
+            lightboxDownload.href = src;
+            lightboxDownload.download = title;
+
+            lightbox!.classList.remove("hidden");
+            // Small delay to allow display:block to apply before opacity transition
+            setTimeout(() => {
+                lightbox!.classList.remove("opacity-0");
+            }, 10);
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeLightbox() {
+            lightbox!.classList.add("opacity-0");
+            setTimeout(() => {
+                lightbox!.classList.add("hidden");
+                lightboxImg.src = "";
+            }, 300);
+            document.body.style.overflow = "";
+        }
+
+        galleryItems.forEach((item) => {
+            item.addEventListener("click", () => {
+                const src = item.getAttribute("data-src");
+                const title = item.getAttribute("data-title");
+                if (src && title) openLightbox(src, title);
+            });
+        });
+
+        closeBtn.addEventListener("click", closeLightbox);
+
+        // Close on background click
+        lightbox.addEventListener("click", (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+
+        // Close on Escape key
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && !lightbox.classList.contains("hidden")) {
+                closeLightbox();
+            }
+        });
+    }
+
+    // Run on invalidation (for View Transitions) and initial load
+    document.addEventListener("astro:page-load", initLightbox);
+
+    // Fallback
+    if (document.readyState === "complete") {
+        initLightbox();
+    } else {
+        document.addEventListener("DOMContentLoaded", initLightbox);
+    }
+</script>

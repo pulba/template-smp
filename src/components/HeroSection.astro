@@ -1,0 +1,222 @@
+---
+//src/components/HeroSection.astro
+import { getCollection } from "astro:content";
+
+const settingsData = await getCollection("settings");
+const settings = settingsData[0]?.data;
+
+const slider = settings?.slider || {};
+const images = slider.images || [
+  {
+    url: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1591123120675-6f7f1aae0e5b?q=80&w=869&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1714192833473-3271b3561c95?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+];
+
+const schoolInfo = slider.schoolInfo || {
+  name: "SMP NEGERI 1",
+  city: "Semarang",
+  motto: "sekolah maju untuk dunia akhirat",
+  welcomeMessage: "Selamat Datang di Website Kami",
+};
+
+const animation = slider.animation || { autoSlide: true, slideInterval: 3000 };
+
+// Generate unique ID untuk slider
+const sliderId = `hero-slider-${Math.random().toString(36).substring(2, 11)}`;
+
+// Ambil data PPDB untuk teks button
+const ppdbCollection = await getCollection("ppdb");
+const ppdbData = ppdbCollection[0]?.data?.datappdb;
+const ppdbText = ppdbData?.ppdbAlias || "PPDB";
+---
+
+<div class="relative h-screen w-full overflow-hidden">
+  <div class="splide splide-hero h-full w-full" id={sliderId}>
+    <div class="splide__track h-full">
+      <ul class="splide__list h-full">
+        {
+          images.map((image, index) => (
+            <li class="splide__slide h-full w-full" data-index={index}>
+              <img
+                src={image.url}
+                class="absolute inset-0 w-full h-full object-cover object-center"
+                alt={image.alt || `Hero Image ${index + 1}`}
+                loading={index === 0 ? "eager" : "lazy"}
+                width="1920"
+                height="1080"
+              />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  {/* Modern Gradient Overlay */}
+  <div class="absolute inset-0 bg-black/70 z-10 pointer-events-none"></div>
+
+  {/* Content */}
+  <div
+    class="absolute inset-0 z-20 flex items-center justify-center px-4 pb-20 md:pb-32"
+  >
+    <div class="text-center max-w-5xl mx-auto" data-animate="fade-up">
+      {/* Welcome Message */}
+      <h2
+        class="text-2xl md:text-4xl font-dafoe text-secondary mb-4 drop-shadow-md"
+      >
+        Welcome to
+      </h2>
+
+      {/* School Name & City */}
+      <h1
+        class="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight mb-6 drop-shadow-lg leading-tight"
+      >
+        {schoolInfo.name}
+        <span
+          class="block text-xl md:text-3xl font-medium mt-3 text-white/90 tracking-wide uppercase"
+          >{schoolInfo.city}</span
+        >
+      </h1>
+
+      {/* Motto */}
+      <p
+        class="text-md md:text-xl text-gray-100 mb-10 max-w-2xl mx-auto italic font-light drop-shadow-sm"
+      >
+        "{schoolInfo.motto}"
+      </p>
+
+      {/* Accreditation Badge */}
+      {
+        schoolInfo.accreditation && (
+          <div class="mb-12 inline-block">
+            <div class="flex items-center gap-3 px-6 py-2.5 rounded-full bg-surface/40 backdrop-blur-md border border-white/20 shadow-xl hover:bg-white/20 transition-colors">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-5 h-5 text-primary"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z" />
+              </svg>
+              <span class="text-primary font-bold tracking-widest text-sm uppercase">
+                {schoolInfo.accreditation.includes("TERAKREDITASI")
+                  ? schoolInfo.accreditation
+                  : `TERAKREDITASI "${schoolInfo.accreditation}"`}
+              </span>
+            </div>
+          </div>
+        )
+      }
+
+      {/* CTA Buttons - Pill Shape & Soft Shadows */}
+      <div
+        class="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 w-full max-w-lg mx-auto"
+      >
+        <a
+          href="/about"
+          class="group relative px-4 py-3 rounded-full bg-primary font-bold shadow-lg shadow-primary/30 transition-transform duration-300 hover:scale-105 hover:shadow-xl w-full"
+        >
+          <span
+            class="relative z-10 text-surface flex items-center justify-center gap-2"
+          >
+            Tentang Kami
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                clip-rule="evenodd"></path>
+            </svg>
+          </span>
+        </a>
+
+        <a
+          href="/ppdb"
+          class="group relative px-4 py-3 rounded-full bg-white font-bold shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl w-full"
+        >
+          <span class="relative text-primary z-10">{ppdbText}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Custom Animations */
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  [data-animate="fade-up"] {
+    animation: fadeUp 1s ease-out forwards;
+  }
+
+  /* Splide Customization if needed */
+  .splide__pagination {
+    bottom: 4rem;
+  }
+  .splide__pagination__page.is-active {
+    background: var(--color-secondary);
+    transform: scale(1.4);
+  }
+</style>
+
+<script>
+  import Splide from "@splidejs/splide";
+  import "@splidejs/splide/css";
+
+  document.addEventListener("astro:page-load", () => {
+    // Initialize only if element exists and not already initialized
+    const sliderEl = document.querySelector(".splide-hero");
+    if (sliderEl && !sliderEl.classList.contains("is-initialized")) {
+      new Splide(sliderEl as HTMLElement, {
+        type: "fade",
+        rewind: true,
+        autoplay: true,
+        interval: 4000,
+        speed: 1000,
+        arrows: false,
+        pagination: true,
+        pauseOnHover: false,
+      }).mount();
+    }
+  });
+
+  // Fallback for non-ViewTransitions
+  document.addEventListener("DOMContentLoaded", () => {
+    const sliderEl = document.querySelector(".splide-hero");
+    if (
+      sliderEl &&
+      !sliderEl.classList.contains("is-initialized") &&
+      !sliderEl.classList.contains("splide--active")
+    ) {
+      new Splide(sliderEl as HTMLElement, {
+        type: "fade",
+        rewind: true,
+        autoplay: true,
+        interval: 4000,
+        speed: 1000,
+        arrows: false,
+        pagination: true,
+        pauseOnHover: false,
+      }).mount();
+    }
+  });
+</script>

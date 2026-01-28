@@ -1,0 +1,175 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import ExtracurricularList from "../../components/ExtracurricularList.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+const allExtracurricular = await getCollection("extracurricular");
+const title = "Ekstrakurikuler";
+
+// Get the latest item (or first item) to use its thumbnail
+const latestExtracurricular = allExtracurricular[0];
+const heroImage =
+  latestExtracurricular?.data.thumbnail ||
+  "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&q=80&w=1920";
+---
+
+<Layout
+  title={title}
+  description="Daftar lengkap ekstrakurikuler yang tersedia di sekolah kami - Temukan minat dan bakat Anda."
+>
+  <!-- HERO SECTION -->
+  <section
+    class="relative min-h-[400px] flex items-center justify-center overflow-hidden"
+  >
+    <!-- Background Image -->
+    <div
+      class="absolute inset-0 bg-cover bg-center z-0"
+      style={`background-image: url('${heroImage}')`}
+    >
+    </div>
+
+    <!-- Modern Gradient Overlay -->
+    <div
+      class="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-gray-900/60 to-gray-900/90 z-10"
+    >
+    </div>
+
+    <!-- Content -->
+    <div class="container relative z-20 px-6 text-center">
+      <h1
+        class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight drop-shadow-lg"
+        data-animate="fade-up"
+      >
+        {title}
+      </h1>
+      <p
+        class="text-xl text-white/90 max-w-2xl mx-auto mb-8 font-light leading-relaxed"
+        data-animate="fade-up"
+        style="animation-delay: 100ms;"
+      >
+        Salurkan minat dan kembangkan bakat Anda melalui beragam kegiatan
+        positif yang kami sediakan.
+      </p>
+
+      <div data-animate="fade-up" style="animation-delay: 200ms;">
+        <Breadcrumb title={title} parent={{ label: "Beranda", href: "/" }} />
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENT SECTION -->
+  <section class="relative bg-gray-50 py-20">
+    <div class="container mx-auto px-6">
+      <!-- Floating Stats Banner -->
+      <div class="relative -mt-32 mb-20 z-30" data-animate="fade-up">
+        <div
+          class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-gray-100"
+        >
+          <div class="p-4">
+            <div class="text-5xl font-bold text-primary mb-2">
+              {allExtracurricular.length}
+            </div>
+            <div
+              class="text-gray-500 font-medium uppercase tracking-wide text-sm"
+            >
+              Pilihan Ekstrakurikuler
+            </div>
+          </div>
+          <div class="p-4">
+            <div class="text-5xl font-bold text-secondary mb-2">
+              {allExtracurricular.filter((item) => item.data.schedule).length}
+            </div>
+            <div
+              class="text-gray-500 font-medium uppercase tracking-wide text-sm"
+            >
+              Jadwal Aktif
+            </div>
+          </div>
+          <div class="p-4">
+            <div class="text-5xl font-bold text-accent mb-2">
+              {
+                allExtracurricular.reduce(
+                  (total, item) =>
+                    total + (item.data.achievements?.length || 0),
+                  0,
+                )
+              }
+            </div>
+            <div
+              class="text-gray-500 font-medium uppercase tracking-wide text-sm"
+            >
+              Total Prestasi
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Title -->
+      <div class="text-center mb-12" data-animate="fade-up">
+        <span
+          class="text-primary font-bold tracking-wider uppercase text-sm bg-primary/10 px-3 py-1 rounded-full"
+          >Minat & Bakat</span
+        >
+        <h2 class="text-3xl font-bold text-gray-900 mt-3">
+          Jelajahi Pilihan Mu
+        </h2>
+      </div>
+
+      <!-- List -->
+      <ExtracurricularList maxItems={allExtracurricular.length} />
+
+      <!-- CTA Box -->
+      <div
+        class="mt-20 relative rounded-3xl overflow-hidden bg-primary text-white text-center py-16 px-6 shadow-2xl"
+        data-animate="fade-up"
+      >
+        <!-- Background Decoration -->
+        <div
+          class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"
+        >
+        </div>
+        <div
+          class="absolute -top-24 -left-24 w-48 h-48 bg-white/10 rounded-full blur-3xl"
+        >
+        </div>
+        <div
+          class="absolute -bottom-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-3xl"
+        >
+        </div>
+
+        <div class="relative z-10 max-w-3xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-6">
+            Siap Mengembangkan Potensi?
+          </h2>
+          <p class="text-white/90 text-lg mb-8 leading-relaxed">
+            Jangan ragu untuk bergabung! Konsultasikan pilihan ekstrakurikuler
+            yang tepat untukmu dengan guru pembina atau wali kelas.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/contact"
+              class="bg-white text-primary hover:bg-gray-100 px-8 py-4 rounded-full font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+            >
+              Hubungi Kami
+            </a>
+            <a
+              href="/profile"
+              class="bg-primary-dark/30 hover:bg-primary-dark/50 border border-white/30 px-8 py-4 rounded-full font-bold transition-all backdrop-blur-sm"
+            >
+              <p class="text-surface">Lihat Profil Sekolah</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { initScrollAnimations } from "../../scripts/scrollAnimations.js";
+
+  // Re-init animations when page loads (supports View Transitions)
+  document.addEventListener("astro:page-load", () => {
+    initScrollAnimations();
+  });
+</script>

@@ -1,0 +1,267 @@
+---
+// file: components/LatestPosts.astro
+import FormattedDate from "./FormattedDate.astro";
+import { getCollection } from "astro:content";
+
+interface PostData {
+  title: string
+  author?: string  // username author
+  pubdate?: Date | string
+  heroImage?: string
+  description?: string
+  category?: string
+}
+
+interface AuthorData {
+  username: string
+  name: string
+  avatar?: string
+  bio?: string
+}
+
+interface Post {
+  slug: string
+  category: string
+  data: PostData
+}
+
+interface Props {
+  posts: Post[]
+  maxPosts?: number
+  layout?: 'grid' | 'sidebar'
+  showDescription?: boolean
+  showAuthorBio?: boolean  // Opsi tambahan untuk tampilan author lengkap
+}
+
+const { 
+  posts, 
+  maxPosts = 6, 
+  layout = 'grid', 
+  showDescription = true,
+  showAuthorBio = false  // Default false untuk komponen list
+} = Astro.props
+
+const displayedPosts = posts.slice(0, maxPosts)
+
+// Fungsi untuk mengambil data author dari koleksi
+async function getAuthorData(username: string): Promise<AuthorData | null> {
+  if (!username) return null;
+  
+  try {
+    const authors = await getCollection("authors");
+    const author = authors.find(a => a.data.username === username);
+    return author?.data ?? null;
+  } catch (error) {
+    return null;
+  }
+}
+
+// Pre-fetch semua data author sekaligus untuk performa lebih baik
+const authorPromises = displayedPosts
+  .filter(post => post.data.author)
+  .map(async (post) => {
+    const authorData = await getAuthorData(post.data.author!);
+    return { username: post.data.author!, data: authorData };
+  });
+
+const authorResults = await Promise.all(authorPromises);
+const authorMap = new Map(
+  authorResults.map(result => [result.username, result.data])
+);
+
+function excerpt(text: string | undefined, limit: number): string {
+  if (!text) return "";
+  return text.length > limit ? text.slice(0, limit) + "..." : text;
+}
+
+function isTextTruncated(text: string | undefined, limit: number): boolean {
+  if (!text) return false;
+  return text.length > limit;
+}
+---
+
+{layout === 'grid' ? (
+  <!-- Layout Grid (Default untuk Home) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    {displayedPosts.map((post) => {
+      const img = post.data?.heroImage ?? "/uploads/default-thumb.jpg"
+      const pub = post.data?.pubdate ?? null
+      const dateObj = pub ? new Date(pub) : null
+      const rawCategory = post.category || post.data.category || "uncategorized"
+      const categorySlug = rawCategory.toLowerCase() || "uncategorized"
+      const categoryLabel =
+        categorySlug === "uncategorized"
+          ? "Uncategorized"
+          : categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)
+
+      const slug = (post.slug || "").toString()
+      
+      // Ambil data author dari map
+      const authorUsername = post.data.author
+      const authorData = authorUsername ? authorMap.get(authorUsername) : null
+
+      return (
+        <div class="bg-surface border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col h-full" data-animate="fade">
+          <div class="relative overflow-hidden aspect-video">
+            <a href={`/posts/${categorySlug}/${slug}`} class="block w-full h-full">
+              <img
+                src={img}
+                alt={post.data.title}
+                loading="lazy"
+                width="400"
+                height="225"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            </a>
+            
+            <div class="absolute top-3 left-3">
+              <a href={`/posts/${categorySlug}/`}>
+                <span class="bg-white/95 text-primary text-xs font-bold px-3 py-1 rounded-full shadow-sm capitalize backdrop-blur-sm">
+                  {post.category}
+                </span>
+              </a>
+            </div>
+          </div>
+
+          <div class="p-5 flex flex-col flex-1">
+            {/* Meta Data (Date & Author) */}
+            <div class="flex items-center gap-4 text-xs text-muted mb-3">
+               {dateObj && (
+                <div class="flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  <FormattedDate date={dateObj} />
+                </div>
+              )}
+            </div>
+
+            <div class="mb-3 flex-1">
+              <a 
+                href={`/posts/${categorySlug}/${slug}`}
+                class="block"
+              >
+                <h3 class="text-xl font-bold text-heading leading-tight group-hover:text-primary transition-colors mb-2">
+                  {post.data.title}
+                </h3>
+              </a>
+              
+              {showDescription && post.data.description && (
+                <p class="text-muted text-sm line-clamp-2 leading-relaxed">
+                  {excerpt(post.data.description, 100)}
+                </p>
+              )}
+            </div>
+
+            <div class="pt-4 mt-auto border-t border-gray-100 flex items-center justify-between">
+               {/* Author */}
+               <div class="flex items-center gap-2">
+                  {authorData ? (
+                    <a href={`/author/${authorData.username}`} class="flex items-center gap-2 group/author">
+                       <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-100 ring-2 ring-transparent group-hover/author:ring-primary/20 transition-all">
+                          {authorData.avatar ? (
+                            <img src={authorData.avatar} alt={authorData.name} class="w-full h-full object-cover" />
+                          ) : (
+                             <div class="w-full h-full flex items-center justify-center bg-primary/10 text-primary">
+                               <span class="text-xs font-bold">{authorData.name.charAt(0)}</span>
+                             </div>
+                          )}
+                       </div>
+                       <span class="text-xs font-medium text-muted group-hover/author:text-heading transition-colors">
+                          {authorData.name}
+                       </span>
+                    </a>
+                  ) : authorUsername && (
+                    <span class="text-xs text-muted">By {authorUsername}</span>
+                  )}
+               </div>
+
+               {/* Read More Link */}
+               <a href={`/posts/${categorySlug}/${slug}`} class="text-sm font-semibold text-primary hover:text-secondary inline-flex items-center gap-1 group/link">
+                  Baca
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover/link:translate-x-1">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+               </a>
+            </div>
+          </div>
+        </div>
+      )
+    })}
+
+  </div>
+) : (
+  <!-- Layout Sidebar (Vertical Cards) -->
+  <div class="space-y-4">
+    {displayedPosts.map((post) => {
+      const img = post.data?.heroImage ?? "/uploads/default-thumb.jpg"
+      const pub = post.data?.pubdate ?? null
+      const dateObj = pub ? new Date(pub) : null
+      const rawCategory = post.category || post.data.category || "uncategorized"
+      const categorySlug = rawCategory.toLowerCase() || "uncategorized"
+      const slug = (post.slug || "").toString()
+
+      return (
+        <article class="group flex gap-4 items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300" data-animate="fade">
+          <!-- Gambar (Compact Thumbnail) -->
+          <div class="shrink-0 w-24 h-24 overflow-hidden rounded-lg relative shadow-inner">
+            <a href={`/posts/${categorySlug}/${slug}`} class="block w-full h-full">
+              <img
+                src={img}
+                alt={post.data.title}
+                loading="lazy"
+                width="96"
+                height="96"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+            </a>
+          </div>
+          
+          <!-- Konten -->
+          <div class="flex-1 min-w-0 flex flex-col h-full justify-between py-1">
+             <div class="mb-1">
+                <div class="flex flex-col sm:flex-row gap-2 text-[10px] text-muted mb-1">
+                  <span class="font-bold text-primary uppercase tracking-wider text-[9px] bg-primary/10 px-2 py-0.5 rounded-sm w-max h-max">
+                    {post.category}
+                  </span>
+                  {dateObj && (
+                      <span class="text-xs text-gray-400">
+                        <FormattedDate date={dateObj} />
+                      </span>
+                  )}
+                </div>
+
+                <h3 class="font-bold text-sm text-heading leading-snug line-clamp-2 group-hover:text-primary transition-colors mb-1">
+                  <a href={`/posts/${categorySlug}/${slug}`}>
+                    {post.data.title}
+                  </a>
+                </h3>
+             </div>
+             
+             <a href={`/posts/${categorySlug}/${slug}`} class="text-xs font-semibold text-primary hover:text-secondary inline-flex items-center gap-1 group/link mt-auto">
+               Selengkapnya
+               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover/link:translate-x-1">
+                 <line x1="5" y1="12" x2="19" y2="12"></line>
+                 <polyline points="12 5 19 12 12 19"></polyline>
+               </svg>
+             </a>
+          </div>
+        </article>
+      )
+    })}
+  </div>
+)}
+
+<style>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
+

@@ -1,0 +1,364 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import ImageGallery from "../../components/ImageGallery.astro";
+import MarkdownRenderer from "../../components/MarkdownRenderer.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+
+export const prerender = true;
+
+// Generate static paths
+export async function getStaticPaths() {
+  const extracurricularItems = await getCollection("extracurricular");
+
+  return extracurricularItems.map((item) => {
+    let slug = item.id.split("/").pop() || item.id;
+
+    if (!slug || slug === "undefined") {
+      slug = item.data.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+    }
+
+    return {
+      params: { slug },
+      props: { item },
+    };
+  });
+}
+
+// Component props
+type Props = {
+  item: any;
+};
+
+const { item } = Astro.props as Props;
+
+if (!item) {
+  throw new Error("Item not found");
+}
+
+const { data } = item;
+const { slug } = Astro.params;
+
+// Fungsi untuk format tanggal
+function formatDate(date: Date) {
+  return new Date(date).toLocaleDateString("id-ID", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+// Type untuk achievement
+interface Achievement {
+  title: string;
+  level?: string;
+  year?: number;
+  description?: string;
+}
+---
+
+<Layout title={data.title} description={data.description}>
+  <!-- HERO SECTION -->
+  <section
+    class="relative min-h-[500px] flex items-center justify-center overflow-hidden"
+  >
+    <!-- Background Image -->
+    <div
+      class="absolute inset-0 bg-cover bg-center z-0"
+      style={`background-image: url(${data.thumbnail || "/uploads/hero-bg.jpg"})`}
+    >
+    </div>
+
+    <!-- Modern Gradient Overlay -->
+    <div
+      class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-gray-900/30 z-10"
+    >
+    </div>
+
+    <!-- Content -->
+    <div
+      class="container relative z-20 px-6 text-center max-w-4xl mx-auto pt-20"
+    >
+      {
+        data.shortName && (
+          <span
+            class="inline-block bg-white/20 backdrop-blur-md border border-white/30 text-white px-6 py-2 rounded-full text-sm font-bold mb-6 tracking-wide shadow-lg"
+            data-animate="fade-down"
+          >
+            {data.shortName}
+          </span>
+        )
+      }
+      <h1
+        class="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight drop-shadow-xl leading-tight"
+        data-animate="fade-up"
+      >
+        {data.title}
+      </h1>
+      {
+        data.description && (
+          <p
+            class="text-lg md:text-xl text-white/90 font-light leading-relaxed drop-shadow-md mb-8"
+            data-animate="fade-up"
+            style="animation-delay: 100ms;"
+          >
+            {data.description}
+          </p>
+        )
+      }
+
+      <div data-animate="fade-up" style="animation-delay: 200ms;">
+        <Breadcrumb
+          title={data.title}
+          parent={{ label: "Ekstrakurikuler", href: "/extracurricular" }}
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENT SECTION -->
+  <section class="py-20 bg-gray-50">
+    <div class="container px-6 mx-auto w-full h-full">
+      <div class="flex flex-col lg:flex-row gap-12">
+        <!-- Main Content -->
+        <div class="w-full lg:w-2/3">
+          <div
+            class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-10 relative overflow-hidden mb-8"
+            data-animate="fade-up"
+          >
+            <div
+              class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"
+            >
+            </div>
+
+            <h2
+              class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3"
+            >
+              <span
+                class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary"
+                >📝</span
+              >
+              Deskripsi Kegiatan
+            </h2>
+
+            <article
+              class="prose prose-lg max-w-none text-gray-600 prose-headings:text-gray-900 prose-headings:font-bold prose-p:leading-relaxed prose-a:text-primary hover:prose-a:text-secondary transition-colors prose-img:rounded-2xl prose-img:shadow-md"
+            >
+              {item.body && <MarkdownRenderer content={item.body} />}
+            </article>
+          </div>
+
+          <!-- Gallery Section -->
+          {
+            data.gallery && data.gallery.length > 0 && (
+              <div
+                class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-10 relative overflow-hidden"
+                data-animate="fade-up"
+              >
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-accent" />
+                <h2 class="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-3">
+                  <span class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                    📸
+                  </span>
+                  Dokumentasi Kegiatan
+                </h2>
+                <ImageGallery
+                  items={data.gallery.map((img: any) => ({
+                    image: img.image,
+                    title: img.caption || "Dokumentasi Ekstrakurikuler",
+                  }))}
+                />
+              </div>
+            )
+          }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="w-full lg:w-1/3">
+          <div class="sticky top-8 space-y-8">
+            <!-- Info Card -->
+            <div
+              class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 overflow-hidden relative group"
+              data-animate="fade-left"
+            >
+              <div
+                class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+              </div>
+
+              <h3
+                class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 relative z-10"
+              >
+                <span class="text-primary">ℹ️</span> Informasi Utama
+              </h3>
+
+              <div class="space-y-6 relative z-10">
+                {/* Schedule */}
+                {
+                  data.schedule && (
+                    <div class="flex gap-4">
+                      <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
+                        📅
+                      </div>
+                      <div>
+                        <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-1">
+                          Jadwal
+                        </h4>
+                        <p class="text-gray-600 text-sm">
+                          {data.schedule.day && (
+                            <span class="block">{data.schedule.day}</span>
+                          )}
+                          {data.schedule.time && (
+                            <span class="block text-gray-500">
+                              {data.schedule.time}
+                            </span>
+                          )}
+                          {data.schedule.location && (
+                            <span class="block text-xs mt-1 bg-gray-100 px-2 py-1 rounded-md inline-block">
+                              📍 {data.schedule.location}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                }
+
+                {/* Instructor */}
+                {
+                  data.instructor && (
+                    <div class="flex gap-4">
+                      <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 flex-shrink-0">
+                        👨‍🏫
+                      </div>
+                      <div>
+                        <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-1">
+                          Pembina
+                        </h4>
+                        <p class="text-gray-600 font-medium">
+                          {data.instructor.name}
+                        </p>
+                        {data.instructor.position && (
+                          <p class="text-xs text-gray-500">
+                            {data.instructor.position}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                }
+              </div>
+
+              <div class="mt-8 pt-6 border-t border-gray-100 relative z-10">
+                <a
+                  href="/contact"
+                  class="flex items-center justify-center w-full py-4 bg-primary rounded-xl font-bold hover:bg-secondary transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 gap-2"
+                >
+                  <span class="text-surface">Daftar Sekarang</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- Achievements Card -->
+            {
+              data.achievements && data.achievements.length > 0 && (
+                <div
+                  class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl shadow-lg p-8 text-white relative overflow-hidden"
+                  data-animate="fade-left"
+                  style="animation-delay: 100ms;"
+                >
+                  <div class="absolute top-0 right-0 -mt-10 -mr-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+
+                  <h3 class="text-xl font-bold mb-6 flex items-center gap-2 relative z-10">
+                    <span>🏆</span> Prestasi
+                  </h3>
+
+                  <div class="space-y-4 relative z-10">
+                    {data.achievements.slice(0, 5).map((achievement: any) => (
+                      <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/5 hover:bg-white/20 transition-colors">
+                        <h4 class="font-bold text-sm mb-1">
+                          {achievement.title}
+                        </h4>
+                        <div class="flex gap-2 text-xs text-white/70">
+                          {achievement.year && <span>{achievement.year}</span>}
+                          {achievement.level && (
+                            <span>• {achievement.level}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { initScrollAnimations } from "../../scripts/scrollAnimations.js";
+
+  // Re-init animations when page loads (supports View Transitions)
+  document.addEventListener("astro:page-load", () => {
+    initScrollAnimations();
+  });
+</script>
+
+<style>
+  .prose {
+    color: #374151;
+    line-height: 1.7;
+  }
+
+  .prose h2 {
+    color: #166534;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .prose h3 {
+    color: #15803d;
+    font-weight: bold;
+    font-size: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .prose p {
+    margin-bottom: 1rem;
+  }
+
+  .prose ul,
+  .prose ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+  }
+
+  .prose li {
+    margin-bottom: 0.5rem;
+  }
+
+  .prose strong {
+    color: #166534;
+    font-weight: bold;
+  }
+</style>

@@ -1,0 +1,198 @@
+---
+// src/components/CardPosts.astro
+import FormattedDate from "./FormattedDate.astro";
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  date?: Date | string | null;
+  category?: string;
+  url: string;
+  author?: {
+    name: string;
+    avatar?: string;
+    username?: string;
+    role?: string;
+  };
+}
+
+const {
+  title = "",
+  description = "",
+  image = "",
+  date = null,
+  category = "Uncategorized",
+  url = "#",
+  author,
+} = Astro.props;
+
+// Validasi category
+const validCategory =
+  category && category !== "undefined" ? category : "Uncategorized";
+
+function excerpt(text: string | undefined, limit: number): string {
+  if (!text) return "";
+  return text.length > limit ? text.slice(0, limit) + "..." : text;
+}
+
+function isTextTruncated(text: string | undefined, limit: number): boolean {
+  if (!text) return false;
+  return text.length > limit;
+}
+---
+
+<article
+  class="bg-surface border border-border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full"
+>
+  <div class="relative overflow-hidden aspect-video">
+    <a href={url} class="block w-full h-full">
+      {
+        image ? (
+          <img
+            src={image}
+            alt={title}
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : (
+          <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </>
+            </svg>
+          </div>
+        )
+      }
+    </a>
+
+    <div class="absolute top-3 left-3">
+      {
+        validCategory && validCategory !== "Uncategorized" && (
+          <a href={`/category/${validCategory.toLowerCase()}`}>
+            <span class="bg-primary/90 text-white text-xs font-medium px-3 py-1 rounded-full shadow-sm capitalize backdrop-blur-sm">
+              {validCategory}
+            </span>
+          </a>
+        )
+      }
+    </div>
+  </div>
+
+  <div class="p-5 flex flex-col flex-1">
+    {/* Date */}
+    <div class="flex items-center gap-4 text-xs text-muted mb-3">
+      {
+        date && (
+          <div class="flex items-center gap-1.5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <FormattedDate date={date} format="short" />
+          </div>
+        )
+      }
+    </div>
+
+    <div class="mb-3 flex-1">
+      <a href={url} class="block">
+        <h3
+          class="text-xl font-bold text-heading leading-tight group-hover:text-primary transition-colors mb-2"
+        >
+          {title}
+        </h3>
+      </a>
+
+      {
+        description && (
+          <p class="text-muted text-sm line-clamp-2 leading-relaxed">
+            {excerpt(description, 100)}
+          </p>
+        )
+      }
+    </div>
+
+    <div
+      class="pt-4 mt-auto border-t border-border flex items-center justify-between"
+    >
+      {/* Author */}
+      <div class="flex items-center gap-2">
+        {
+          author && (
+            <a
+              href={author.username ? `/author/${author.username}` : "#"}
+              class="flex items-center gap-2 group/author"
+            >
+              <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-100 ring-2 ring-transparent group-hover/author:ring-primary/20 transition-all">
+                {author.avatar ? (
+                  <img
+                    src={author.avatar}
+                    alt={author.name}
+                    class="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center bg-primary/10 text-primary">
+                    <span class="text-xs font-bold">
+                      {author.name.charAt(0)}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <span class="text-xs font-medium text-muted group-hover/author:text-heading transition-colors">
+                {author.name}
+              </span>
+            </a>
+          )
+        }
+      </div>
+
+      {/* Read More Link */}
+      <a
+        href={url}
+        class="text-sm font-semibold text-primary hover:text-secondary inline-flex items-center gap-1 group/link"
+      >
+        Baca
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="transition-transform group-hover/link:translate-x-1"
+        >
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
+    </div>
+  </div>
+</article>

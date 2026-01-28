@@ -1,0 +1,296 @@
+---
+import Layout from "../layouts/Layout.astro";
+import LatestPosts from "../components/LatestPosts.astro";
+import ExtracurricularList from "../components/ExtracurricularList.astro";
+import Highlight from "../components/Highlight.astro";
+import Contact from "../components/Contact.astro";
+import "../styles/global.css";
+import { getCollection } from "astro:content";
+import websiteSettings from "../content/settings/website.json";
+import HeroSection from "../components/HeroSection.astro";
+import StaffList from "../components/StaffList.astro";
+import Year from "../components/Year.astro";
+import GallerySlider from "../components/GallerySlider.astro";
+const allPosts = await getCollection("posts");
+
+// Proses posts untuk mendapatkan category dan slug yang benar
+const processedPosts = allPosts.map((post) => {
+  const filePath = post.filePath ?? "";
+  let category = "";
+  let slug = "";
+
+  // Extract category dari filePath
+  if (filePath.startsWith("src/content/posts/")) {
+    const relPath = filePath.replace(/^src\/content\/posts\//, "");
+    const parts = relPath.split("/");
+    if (parts.length >= 2) {
+      category = parts[0];
+      // Slug adalah sisa path tanpa extension
+      slug = parts
+        .slice(1)
+        .join("/")
+        .replace(/\.mdx?$/, "");
+    }
+  }
+
+  // Fallback ke frontmatter jika tidak ditemukan di filePath
+  if (!category && post.data.category) {
+    category = post.data.category;
+  }
+
+  // Fallback untuk slug - gunakan id sebagai fallback
+  if (!slug) {
+    slug = post.id.split("/").pop() ?? "";
+  }
+
+  return {
+    slug,
+    category,
+    data: post.data,
+  };
+});
+
+// Filter posts by category (contoh: pengumuman)
+const pengumumanPosts = processedPosts
+  .filter((post) => post.category.toLowerCase() === "pengumuman")
+  .sort((a, b) => {
+    // Gunakan pubdate, jika tidak ada gunakan tanggal default
+    const dateA = new Date(a.data.pubdate ?? 0).getTime();
+    const dateB = new Date(b.data.pubdate ?? 0).getTime();
+    return dateB - dateA; // Terbaru dulu
+  });
+
+const prestasiPosts = processedPosts
+  .filter((post) => post.category.toLowerCase() === "prestasi")
+  .sort((a, b) => {
+    // Gunakan pubdate, jika tidak ada gunakan tanggal default
+    const dateA = new Date(a.data.pubdate ?? 0).getTime();
+    const dateB = new Date(b.data.pubdate ?? 0).getTime();
+    return dateB - dateA; // Terbaru dulu
+  });
+
+// Atau ambil semua posts terbaru
+const latestPosts = processedPosts
+  .sort((a, b) => {
+    const dateA = new Date(a.data.pubdate ?? 0).getTime();
+    const dateB = new Date(b.data.pubdate ?? 0).getTime();
+    return dateB - dateA;
+  })
+  .slice(0, 6); // 6 post terbaru
+---
+
+<Layout>
+  <HeroSection />
+
+  <Highlight />
+
+  <!-- Berita Section -->
+  <section class="py-20 bg-white">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16" data-animate="fade-up">
+        <span
+          class="text-primary font-bold tracking-wider uppercase text-sm mb-2 block"
+          >Informasi Sekolah</span
+        >
+        <h2 class="text-3xl md:text-4xl font-bold text-heading">
+          Berita & Kegiatan Terbaru
+        </h2>
+        <div class="w-20 h-1.5 bg-secondary mx-auto mt-4 rounded-full"></div>
+      </div>
+
+      <LatestPosts posts={latestPosts} maxPosts={4} showDescription={true} />
+
+      <div class="text-center mt-12">
+        <a
+          href="/posts"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-surface border-2 border-primary/10 text-primary font-bold hover:bg-primary hover:text-white transition-all duration-300"
+        >
+          Lihat Semua Berita
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg
+          >
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Prestasi Section -->
+  <section class="py-20 bg-gray-50 relative overflow-hidden">
+    <!-- Background Decoration -->
+    <div
+      class="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"
+    >
+    </div>
+    <div
+      class="absolute bottom-0 left-0 w-72 h-72 bg-secondary/5 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"
+    >
+    </div>
+
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="flex flex-col lg:flex-row gap-12 items-center">
+        <!-- Left Content -->
+        <div
+          class="lg:w-1/3 text-center lg:text-left"
+          data-animate="fade-right"
+        >
+          <span
+            class="text-secondary font-bold tracking-wider uppercase text-sm mb-2 block"
+            >Hall of Fame</span
+          >
+          <h2
+            class="text-3xl md:text-5xl font-bold text-heading mb-6 leading-tight"
+          >
+            Prestasi <span class="text-primary">Siswa</span>
+          </h2>
+          <p class="text-muted text-lg mb-8 leading-relaxed">
+            Kami bangga dengan pencapaian luar biasa siswa-siswi kami di
+            berbagai bidang akademik dan non-akademik.
+          </p>
+          <a
+            href="/posts/prestasi"
+            class="inline-block bg-primary px-8 py-3.5 rounded-full font-bold shadow-lg shadow-primary/30 hover:shadow-xl hover:-translate-y-1 hover:bg-secondary transition-all duration-300"
+          >
+            <p class="text-surface">Lihat Semua Prestasi</p>
+          </a>
+        </div>
+
+        <!-- Right Content (List) -->
+        <div class="lg:w-2/3 w-full" data-animate="fade-left">
+          <div
+            class="bg-white p-2 rounded-3xl shadow-xl border border-gray-100"
+          >
+            <LatestPosts
+              posts={prestasiPosts}
+              maxPosts={3}
+              showDescription={true}
+              layout="sidebar"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ekstrakurikuler Section -->
+  <section class="py-24 bg-white">
+    <div class="container mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16" data-animate="fade-up">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4 text-heading">
+          Wadah Kreativitas Siswa
+        </h2>
+        <p class="text-lg text-muted">
+          Mengasah bakat dan minat melalui berbagai kegiatan ekstrakurikuler
+          yang bervariasi.
+        </p>
+      </div>
+
+      <ExtracurricularList />
+
+      <div data-animate="fade-up" class="mt-12 text-center">
+        <a href="/extracurricular" class="inline-block group">
+          <span
+            class="text-heading font-medium group-hover:text-primary transition-colors"
+            >Lihat semua ekstrakurikuler &rarr;</span
+          >
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <GallerySlider />
+
+  <!-- PPDB CTA Section -->
+  <section class="relative py-24 px-6 overflow-hidden">
+    <!-- Background Image with Parallax Effect -->
+    <div class="absolute inset-0 z-0">
+      <img
+        src="https://images.unsplash.com/photo-1494949649109-ecfc3b8c35df?q=80&w=1032&auto=format&fit=crop"
+        class="w-full h-full object-cover"
+        alt="Background School"
+      />
+      <div
+        class="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/70 mix-blend-multiply"
+      >
+      </div>
+    </div>
+
+    <div class="container relative z-10 w-full mx-auto text-center">
+      <div class="max-w-3xl mx-auto">
+        <h1
+          data-animate="fade-up"
+          class="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight"
+        >
+          Penerimaan Peserta Didik Baru <Year />
+        </h1>
+        <p
+          data-animate="fade-up"
+          class="text-xl text-white/90 mb-10 font-light"
+        >
+          Bergabunglah bersama kami untuk masa depan yang lebih cerah.
+        </p>
+        <a href="/ppdb" data-animate="zoom-in" class="inline-block">
+          <button
+            class="bg-white text-primary text-lg font-bold py-4 px-10 rounded-full shadow-2xl hover:bg-secondary hover:text-white hover:scale-105 transition-all duration-300"
+          >
+            Daftar Sekarang
+          </button>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tenaga Pendidik -->
+  <section class="py-24 bg-gradient-to-b from-white to-gray-50">
+    <div class="container mx-auto px-6 py-8">
+      <div
+        class="flex items-end justify-between mb-12"
+        data-animate="fade-down"
+      >
+        <div>
+          <span
+            class="text-secondary font-bold tracking-wider uppercase text-sm mb-2 block"
+            >Tim Pengajar</span
+          >
+          <h2 class="text-3xl md:text-4xl font-bold text-heading">
+            Tenaga Pendidik
+          </h2>
+        </div>
+        <a
+          href="/about/kepegawaian"
+          class="hidden md:inline-flex items-center text-sm font-bold text-primary hover:underline"
+        >
+          Lihat Semua Guru &rarr;
+        </a>
+      </div>
+
+      <StaffList />
+
+      <div class="mt-8 text-center md:hidden">
+        <a href="/staff" class="text-sm font-bold text-primary"
+          >Lihat Semua Guru &rarr;</a
+        >
+      </div>
+    </div>
+  </section>
+
+  <Contact />
+
+  <script>
+    import { initScrollAnimations } from "../scripts/scrollAnimations.js";
+
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        initScrollAnimations();
+      }, 50);
+    });
+  </script>
+</Layout>

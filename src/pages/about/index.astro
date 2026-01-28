@@ -1,0 +1,145 @@
+---
+import Layout from "../../layouts/Layout.astro"
+import Breadcrumb from "../../components/Breadcrumb.astro"
+import { getEntry } from "astro:content"
+
+const about = await getEntry("about", "index")
+if (!about) throw new Error("About data not found")
+
+const { facilities, gallery, kepegawaian, profil, sambutan, visimisi } = about.data
+
+const cards = [
+  {
+    title: "Profil Sekolah",
+    description: "Sejarah, identitas, dan budaya sekolah.",
+    image: profil.items[0]?.image,
+    url: "/about/profil",
+    icon: "🏫"
+  },
+  {
+    title: "Visi & Misi",
+    description: "Cita-cita dan langkah strategis sekolah.",
+    image: visimisi.items[0]?.image,
+    url: "/about/visimisi",
+    icon: "🎯"
+  },
+  {
+    title: "Sambutan Kepala Sekolah",
+    description: "Pesan dan arahan dari pimpinan sekolah.",
+    image: sambutan.items[0]?.image,
+    url: "/about/sambutan",
+    icon: "👋"
+  },
+  {
+    title: "Tenaga Pendidik",
+    description: "Guru dan staf pengajar profesional kami.",
+    image: kepegawaian.items[0]?.image,
+    url: "/about/kepegawaian",
+    icon: "👨‍🏫"
+  },
+  {
+    title: "Fasilitas Sekolah",
+    description: "Sarana penunjang kegiatan belajar mengajar.",
+    image: facilities.items[0]?.image,
+    url: "/about/facilities",
+    icon: "🏢"
+  },
+  {
+    title: "Galeri Kegiatan",
+    description: "Dokumentasi aktivitas siswa dan sekolah.",
+    image: gallery.items[0]?.image,
+    url: "/about/gallery",
+    icon: "📸"
+  }
+]
+const title = "Tentang Kami"
+---
+<Layout title={title}>
+  <!-- Hero Section -->
+  <section class="relative min-h-[400px] flex items-center justify-center overflow-hidden">
+    <!-- Background Image -->
+    <div 
+        class="absolute inset-0 bg-cover bg-center z-0"
+        style={`background-image: url(${cards[0]?.image || '/uploads/hero-bg.jpg'})`}
+    ></div>
+    
+    <!-- Modern Gradient Overlay -->
+    <div class="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-gray-900/60 to-gray-900/90 z-10"></div>
+
+    <!-- Content -->
+    <div class="container relative z-20 px-6 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight drop-shadow-lg" data-animate="fade-up">
+            {title}
+        </h1>
+        <p class="text-xl text-white/90 max-w-2xl mx-auto mb-8 font-light leading-relaxed" data-animate="fade-up" style="animation-delay: 100ms;">
+            Mengenal lebih dekat profil, visi, dan semangat kami dalam mencerdaskan bangsa.
+        </p>
+        
+        <div data-animate="fade-up" style="animation-delay: 200ms;">
+             <Breadcrumb title="Tentang Kami" parent={{ label: "Beranda", href: "/" }} />
+        </div>
+    </div>
+  </section>
+
+  <!-- Navigation Grid -->
+  <section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {
+          cards.map((card, index) => (
+            <a
+              href={card.url}
+              class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 flex flex-col h-full"
+              data-animate="fade-up"
+              style={`animation-delay: ${index * 100}ms;`}
+            >
+              <!-- Card Image -->
+              <div class="relative h-56 overflow-hidden">
+                <div class="absolute inset-0 bg-gray-200 animate-pulse"></div>
+                <img
+                  src={card.image || '/uploads/placeholder.jpg'}
+                  alt={card.title}
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 relative z-10"
+                  loading="lazy"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60 group-hover:opacity-40 transition-opacity z-20"></div>
+                
+                {/* Icon Badge */}
+                <div class="absolute bottom-4 left-4 z-30 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    {card.icon}
+                </div>
+              </div>
+
+              <!-- Card Content -->
+              <div class="p-8 flex flex-col flex-1">
+                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">
+                  {card.title}
+                </h3>
+                <p class="text-gray-500 mb-6 leading-relaxed flex-1">
+                  {card.description}
+                </p>
+                
+                <div class="flex items-center text-primary font-semibold text-sm group/link">
+                   <span class="border-b-2 border-transparent group-hover/link:border-primary transition-all">Jelajahi Halaman</span>
+                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 transform group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                   </svg>
+                </div>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+    import { initScrollAnimations } from "../../scripts/scrollAnimations.js";
+
+    // Re-init animations when page loads (supports View Transitions)
+    document.addEventListener('astro:page-load', () => {
+        initScrollAnimations();
+    });
+</script>
+

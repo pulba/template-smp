@@ -1,0 +1,174 @@
+---
+import { getCollection } from "astro:content";
+
+// Ambil data settings
+const settingsData = await getCollection("settings");
+const settings = settingsData[0]?.data || {};
+
+// Ambil nama sekolah dengan cara yang lebih aman
+let schoolName = "Nama Sekolah";
+let schoolMotto = "Mewujudkan Generasi Unggul";
+let schoolAddress = "Alamat Sekolah";
+
+if (settings.footer?.schoolName) {
+    schoolName = settings.footer.schoolName;
+} else if (settings.header?.schoolInfo?.name) {
+    schoolName = settings.header.schoolInfo.name;
+}
+
+if (settings.slider?.schoolInfo?.motto) {
+    schoolMotto = settings.slider.schoolInfo.motto;
+}
+
+// Tahun otomatis
+const currentYear = new Date().getFullYear();
+---
+
+<footer
+    role="contentinfo"
+    class="bg-gray-900 text-white border-t border-gray-800"
+>
+    <div class="container mx-auto px-6 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+            <!-- Brand Column -->
+            <div class="lg:col-span-1 space-y-4">
+                <h2 class="text-2xl font-bold text-white tracking-wide">
+                    {schoolName}
+                </h2>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    {schoolMotto}
+                </p>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h3 class="font-bold text-lg mb-4 text-white">Tautan Cepat</h3>
+                <ul class="space-y-3 text-sm">
+                    <li>
+                        <a href="/"
+                            ><span
+                                class="text-muted hover:text-primary transition-colors"
+                                >Beranda</span
+                            ></a
+                        >
+                    </li>
+                    <li>
+                        <a href="/about"
+                            ><span
+                                class="text-muted hover:text-primary transition-colors"
+                                >Profil Sekolah</span
+                            ></a
+                        >
+                    </li>
+                    <li>
+                        <a href="/posts"
+                            ><span
+                                class="text-muted hover:text-primary transition-colors"
+                                >Berita & Artikel</span
+                            ></a
+                        >
+                    </li>
+                    <li>
+                        <a href="/ppdb"
+                            ><span
+                                class="text-muted hover:text-primary transition-colors"
+                                >Informasi PPDB</span
+                            ></a
+                        >
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Akademik -->
+            <div>
+                <h3 class="font-bold text-lg mb-4 text-white">Akademik</h3>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li>
+                        <a href="/extracurricular"
+                            ><span
+                                class="text-muted hover:text-primary transition-colors"
+                                >Ekstrakurikuler</span
+                            ></a
+                        >
+                    </li>
+                    <li>
+                        <a href="/staff"
+                            ><span
+                                class="text-muted hover:text-primary transition-colors"
+                                >Tenaga Pendidik</span
+                            ></a
+                        >
+                    </li>
+                    <li>
+                        <a href="/posts/prestasi"
+                            ><span
+                                class="text-muted hover:text-primary transition-colors"
+                                >Prestasi Siswa</span
+                            ></a
+                        >
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Social / Contact -->
+            <div>
+                <h3 class="font-bold text-lg mb-4 text-white">Hubungi Kami</h3>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li class="flex items-start gap-3">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-5 h-5 text-muted shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            ></path><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            ></path></svg
+                        >
+                        <span>Lihat di Peta (Google Maps)</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-5 h-5 text-muted shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            ></path></svg
+                        >
+                        <span
+                            >admin@{
+                                schoolName.replace(/\s+/g, "").toLowerCase()
+                            }.sch.id</span
+                        >
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div
+            class="mt-16 pt-8 border-t border-gray-800 text-center text-sm text-gray-500"
+        >
+            <p>
+                &copy; {currentYear}
+                {schoolName}. All Rights Reserved. <span class="mx-2">|</span>
+                <a href="/privacy-policy" class="hover:text-white"
+                    >Kebijakan Privasi</a
+                >
+            </p>
+        </div>
+    </div>
+</footer>

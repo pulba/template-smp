@@ -1,0 +1,91 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getEntry } from "astro:content";
+import Sidebar from "../../components/Sidebar.astro";
+import MarkdownRenderer from "../../components/MarkdownRenderer.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+
+const about = await getEntry("about", "index");
+if (!about) throw new Error("About data not found");
+
+const { visimisi } = about.data;
+const item = visimisi.items[0];
+const backgroundImage = item?.image;
+
+const title = "Visi Misi Sekolah";
+---
+
+<Layout title={title}>
+  <!-- HERO SECTION -->
+  <section
+    class="relative min-h-[400px] flex items-center justify-center overflow-hidden"
+  >
+    <!-- Background Image -->
+    <div
+      class="absolute inset-0 bg-cover bg-center z-0"
+      style={`background-image: url(${backgroundImage || "/uploads/hero-bg.jpg"})`}
+    >
+    </div>
+
+    <!-- Modern Gradient Overlay -->
+    <div
+      class="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-gray-900/60 to-gray-900/90 z-10"
+    >
+    </div>
+
+    <!-- Content -->
+    <div class="container relative z-20 px-6 text-center">
+      <h1
+        class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight drop-shadow-lg"
+        data-animate="fade-up"
+      >
+        {title}
+      </h1>
+
+      <div data-animate="fade-up" style="animation-delay: 200ms;">
+        <Breadcrumb
+          title={title}
+          parent={{ label: "Tentang Kami", href: "/about" }}
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <section class="py-20 bg-gray-50">
+    <div
+      class="container px-6 mx-auto w-full h-full flex flex-col lg:flex-row gap-12"
+    >
+      <!-- Content Area -->
+      <div class="w-full lg:w-3/4 mb-12 lg:mb-0">
+        <div
+          class="bg-white rounded-3xl shadow-sm p-8 md:p-12 border border-gray-100 relative overflow-hidden"
+        >
+          <!-- Decorative top accent -->
+          <div
+            class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-secondary"
+          >
+          </div>
+
+          <article
+            class="prose prose-lg max-w-none text-gray-600 prose-headings:text-gray-900 prose-headings:font-bold prose-p:leading-relaxed prose-a:text-primary hover:prose-a:text-secondary transition-colors prose-img:rounded-2xl prose-img:shadow-md"
+          >
+            <MarkdownRenderer content={item.body} />
+          </article>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <Sidebar />
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { initScrollAnimations } from "../../scripts/scrollAnimations.js";
+
+  // Re-init animations when page loads (supports View Transitions)
+  document.addEventListener("astro:page-load", () => {
+    initScrollAnimations();
+  });
+</script>
